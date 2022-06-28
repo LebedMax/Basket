@@ -1,0 +1,82 @@
+﻿@model List<Basket.Models.CartLine>
+
+@{
+    ViewBag.Title = "Purchase added products";
+}
+
+
+<style>
+    ul {
+        list-style-type: none;
+    }
+
+    input {
+        margin: 5px;
+    }
+</style>
+
+<h2>Purchase added products</h2>
+
+<div class="product-container">
+    <table>
+        <thead>
+            <tr>
+                <td>Name</td>
+                <td>Price</td>
+                <td>Quantity</td>
+                <td>Sum</td>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Price</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Quantity * @item.Price</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="client-details">
+    <table>
+        <thead>
+            <tr>
+                <td></td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><label>Name</label></td>
+                <td><input id="client-name" type="text"></td>
+            </tr>
+            <tr>
+                <td><label>Surname</label></td>
+                <td><input id="client-surname" type="text"></td>
+            </tr>
+            <tr>
+                <td><label>Address</label></td>
+                <td><input id="client-address" type="text"></td>
+            </tr>
+            <tr>
+                <td><label>Phone</label></td>
+                <td><input id="client-phone" type="tel" placeholder="093-123-4567" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"></td>
+            </tr>
+            <tr>
+                <td><label>Email</label></td>
+                <td><input type="email" id="client-email" size="30"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button id="purchase-btn" onclick="purchase()">Purchase</button>
+
+
+</div>
+
+@Scripts.Render("~/Scripts/purchase.js")

@@ -1,0 +1,68 @@
+﻿@model Basket.Models.PaymentSessionWithSum
+
+<style>
+    .card-number-container > input {
+        background-color: yellow;
+        width: 98%;
+    }
+
+    body {
+        width: 100%;
+    }
+
+    input {
+        margin: 5px;
+        margin-top: 3px;
+        height: 26px;
+        font-size: 16px;
+        border-radius: 3px;
+        border: 1px solid #423939;
+        width: 95%;
+    }
+
+    .card-container {
+        position: relative;
+        margin: auto;
+        width: 50%;
+    }
+
+    .card-cvv-container {
+        display: inline-block;
+        width: 45%;
+        margin-left: 8.5%;
+        background-color: bisque;
+    }
+
+    .card-validity-period-container {
+        display: inline-block;
+        width: 45%;
+        background-color: aqua;
+    }
+
+    .card-number-container {
+        width: 100%;
+    }
+</style>
+
+
+<div class="card-container">
+    <h3>Total: @Model.Sum UAH</h3>
+    <div class="card-number-container">
+        <!-- <label>Card Number</label> -->
+        <input type="text" id="card-number" placeholder="Card Number" />
+    </div>
+    <div class="card-second-line">
+        <div class="card-validity-period-container">
+            <!-- <label>DD/MM</label> -->
+            <input type="text" id="card-validity-period" placeholder="DD/MM" />
+        </div>
+        <div class="card-cvv-container">
+            <!-- <label>CVV</label> -->
+            <input type="text" id="card-cvv" placeholder="CVV" />
+        </div>
+    </div>
+
+    <button id="submit" onclick="pay()">Pay</button>
+</div>
+
+@Scripts.Render("~/Scripts/payment.js")

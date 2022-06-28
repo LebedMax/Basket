@@ -1,0 +1,39 @@
+﻿@model List<Basket.Models.CartLine>
+
+    <style>
+        h2 {
+            font-family: arial;
+            color: red;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-radius: 10px;
+        }
+    </style>
+
+    <h2>List of goods</h2>
+
+    <table>
+
+        <thead>
+            <tr>
+                <td>NameProduct</td>
+                <td>Quantity</td>
+                <td>Price</td>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Description</td>
+                <td>@item.Price</td>
+
+            </tr>
+            }
+            <button type="button">Click Me!</button>
+        </tbody>
+    </table>

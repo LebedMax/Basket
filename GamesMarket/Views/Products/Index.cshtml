@@ -1,0 +1,70 @@
+﻿@model List<Basket.Models.Game>
+
+@{
+    ViewBag.Title = "Product List";
+}
+
+@Scripts.Render("~/Scripts/cart.js")
+
+<style>
+    h2 {
+        font-family: arial;
+        color:red;
+
+    }
+    table, th, td {
+        border: 1px solid black;
+        border-radius: 10px;
+    }
+    .basket-container{
+        display:inline-block;
+        float: right;
+        margin-top: -50px;
+        cursor: pointer;
+    }
+    #basket-list {
+        border: solid;
+        border-radius: 20px;
+        padding: 15px;
+    }
+</style>
+
+<h2>Index</h2>
+
+<div class="basket-container">
+    <h3 id="basket-btn" onclick="showBasket()">🛒</h3>
+    <div id="basket-list" style="display: none;">
+        <ul>
+            <li>One</li>
+            <li>Two</li>
+            <li>Three</li>
+        </ul>
+    </div>
+
+</div>
+
+
+<table>
+    <thead>
+        <tr>
+            <td>Name</td>
+            <td>Description</td>
+            <td>Price</td>
+            <td>Quantity</td>
+            <td>🛒</td>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Description</td>
+                <td>@item.Price</td>
+                <td><input type="number" value="1" /></td>
+                <td><a data-id="@item.GameId" onclick="AddToCart(this)">Add to cart</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
