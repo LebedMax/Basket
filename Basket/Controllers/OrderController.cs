@@ -1,28 +1,28 @@
-﻿
-using Data_Layer;
-using Basket.BusinessLayer;
+﻿using Basket.BusinessLayer;
 using System.Web.Mvc;
 using Basket.Models;
 using System.Web.Http;
+// using Basket.BusinessLayer.Interface;
 
 namespace Basket.Controllers
 {
     public class OrderController : Controller
     {
-        private IOrderManagement _orderManagement;
-
+        // private IOrderManagement _orderManagement;
+        // private readonly IOrderData _OrderData;
+        
         public OrderController()
         {
-            _orderManagement = new OrderManagement();
+            // _orderManagement = new OrderManagement();
         }
-        private readonly IOrderData _OrderData;
+
         public void CreateNewOrder([FromBody] Order order)
         {
-            _orderManagement.CreateNewOrder(order.name, order.surname, order.date);
+            // _orderManagement.CreateNewOrder(order.name, order.surname, order.date);
         }
-        public ActionResult Index()
-        {
-            return View();
-        }
+        // public ActionResult Index()
+        // {
+        //     return View();
+        // }
     }
 }

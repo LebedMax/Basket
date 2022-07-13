@@ -247,12 +247,6 @@
     <Content Include="Views\Home\SomeData.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
-    <Folder Include="Views\Cart\" />
-    <Folder Include="Views\Listing\" />
-    <Folder Include="Views\Order\" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
   </ItemGroup>
   <ItemGroup>

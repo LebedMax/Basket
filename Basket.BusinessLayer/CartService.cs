@@ -1,18 +1,20 @@
 ﻿using Basket.Models;
 using System.Collections.Generic;
 using System.Linq;
+using Basket.BusinessLayer.Interface;
 
 namespace Basket.BusinessLayer
 {
     public class CartService : ICartService
     {
-        private static Dictionary<string, ClientSessionInfo> _cart = new Dictionary<string, ClientSessionInfo>();
+        private static readonly Dictionary<string, ClientSessionInfo> Cart =
+            new Dictionary<string, ClientSessionInfo>();
 
         private readonly IGamesService _gamesService;
 
         private readonly ISessionService _sessionService;
 
-        private static object _lockObject = new object();
+        private static readonly object LockObject = new object();
 
         public CartService()
         {
@@ -21,48 +23,48 @@ namespace Basket.BusinessLayer
             _sessionService = new SessionService();
         }
 
-        public void Add(int gameId, int quontity, string sessionId)
+        public void Add(int gameId, int quantity, string sessionId)
         {
-            lock(_lockObject)
+            lock(LockObject)
             {
                 if (!_sessionService.CheckExpirationDate(sessionId))
                 {
                     throw new System.Exception("Unknown sessionId");
                 }
 
-                bool validationResult = _sessionService.CheckExpirationDate(sessionId);
+                var validationResult = _sessionService.CheckExpirationDate(sessionId);
 
                 if (!validationResult)
                 {
-                    _cart.Remove(sessionId);
+                    Cart.Remove(sessionId);
                 }
                 else
                 {
                     var game = _gamesService.GetProduct(gameId);
 
-                    if (!_cart.ContainsKey(sessionId))
+                    if (!Cart.ContainsKey(sessionId))
                     {
-                        _cart[sessionId] = new ClientSessionInfo
+                        Cart[sessionId] = new ClientSessionInfo
                         {
                             Cart = new List<CartLine>()
                         };
-                    };
+                    }
 
-                    var currentGame = _cart[sessionId].Cart.FirstOrDefault(t => t.GameId == gameId);
+                    var currentGame = Cart[sessionId].Cart.FirstOrDefault(t => t.GameId == gameId);
 
                     if (currentGame == null)
                     {
-                        _cart[sessionId].Cart.Add(new CartLine
+                        Cart[sessionId].Cart.Add(new CartLine
                         {
                             GameId = gameId,
-                            Quantity = quontity,
+                            Quantity = quantity,
                             Price = game.Price,
                             Name = game.Name
                         });
                     }
                     else
                     {
-                        currentGame.Quantity += quontity;
+                        currentGame.Quantity += quantity;
                     }
                 }
             }
@@ -75,24 +77,28 @@ namespace Basket.BusinessLayer
                 throw new System.Exception("Unknown sessionId");
             }
             
-            if (!_cart.ContainsKey(sessionId))
+            if (!Cart.ContainsKey(sessionId))
             {
-                _cart[sessionId] = new ClientSessionInfo
+                Cart[sessionId] = new ClientSessionInfo
                 {
                     Cart = new List<CartLine>()
                 };
             }
             
-            var currentGame = _cart[sessionId].Cart.FirstOrDefault(t => t.GameId == gameId);
+            var currentGame = Cart[sessionId].Cart.FirstOrDefault(t => t.GameId == gameId);
+
+            if (currentGame == null)
+            {
+                return;
+            }
 
             if (currentGame.Quantity > 1)
             {
                 currentGame.Quantity--;
-
             }
             else
             {
-                _cart[sessionId].Cart.RemoveAll(t => t.GameId == gameId);
+                Cart[sessionId].Cart.RemoveAll(t => t.GameId == gameId);
             }
         }
 
@@ -103,38 +109,37 @@ namespace Basket.BusinessLayer
                 throw new System.Exception("Unknown sessionId");
             }
 
-            if (!_cart.ContainsKey(sessionId))
-            {
-                return new List<CartLine>();
-            }
-
-            return _cart[sessionId].Cart;
+            return !Cart.ContainsKey(sessionId)
+                ? new List<CartLine>()
+                : Cart[sessionId].Cart;
         }
 
-        public decimal OveralPrice(List<CartLine> cart)
+        public decimal OverallPrice(List<CartLine> cart)
         {
-           decimal overalPrice = 0;
+           decimal overallPrice = 0;
 
-            if (cart != null)
-            {
-                foreach (var line in cart)
-                {
-                    var game = _gamesService.GetProduct(line.GameId);
+           if (cart == null)
+           {
+               return overallPrice;
+           }
+           
+           foreach (var line in cart)
+           {
+                var game = _gamesService.GetProduct(line.GameId);
 
-                    var currentSum = game.Price * line.Quantity;
+                var currentSum = game.Price * line.Quantity;
 
-                    overalPrice += currentSum;
-                }
-            }
+                overallPrice += currentSum;
+           }
 
-            return overalPrice;
+           return overallPrice;
         }
 
         public void RemoveAllCart(string sessionId)
         {
-            if (_cart.ContainsKey(sessionId))
+            if (Cart.ContainsKey(sessionId))
             {
-                _cart.Remove(sessionId);
+                Cart.Remove(sessionId);
             }
         }
 
@@ -145,15 +150,15 @@ namespace Basket.BusinessLayer
                 throw new System.Exception("Unknown sessionId");
             }
 
-            if (!_cart.ContainsKey(sessionId))
+            if (!Cart.ContainsKey(sessionId))
             {
-                _cart[sessionId] = new ClientSessionInfo
+                Cart[sessionId] = new ClientSessionInfo
                 {
                     Cart = new List<CartLine>()
                 };
             }
 
-            _cart[sessionId].PurchaseDetails = clientDetails;
+            Cart[sessionId].PurchaseDetails = clientDetails;
         }
 
         public ClientDetails GetClientDetails(string sessionId)
@@ -163,15 +168,15 @@ namespace Basket.BusinessLayer
                 throw new System.Exception("Unknown sessionId");
             }
 
-            if (!_cart.ContainsKey(sessionId))
+            if (!Cart.ContainsKey(sessionId))
             {
-                _cart[sessionId] = new ClientSessionInfo
+                Cart[sessionId] = new ClientSessionInfo
                 {
                     Cart = new List<CartLine>()
                 };
             }
 
-            return _cart[sessionId].PurchaseDetails;
+            return Cart[sessionId].PurchaseDetails;
         }
     }
 }

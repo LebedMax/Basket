@@ -2,7 +2,9 @@
 using Basket.Models;
 using GamesMarket.Models;
 using System;
+using System.Globalization;
 using System.Web.Mvc;
+using Basket.BusinessLayer.Interface;
 
 namespace GamesMarket.Controllers
 {
@@ -35,16 +37,16 @@ namespace GamesMarket.Controllers
         {
             if (!_sessionService.CheckExpirationDate(item.SessionId))
             {
-                throw new System.Exception("Unknown sessionId");
+                throw new Exception("Unknown sessionId");
             }
 
-            bool validationResult = _sessionService.CheckExpirationDate(item.SessionId);
+            var validationResult = _sessionService.CheckExpirationDate(item.SessionId);
 
             if (!validationResult)
             {
                 _cartService.RemoveAllCart(item.SessionId);
 
-                return View("~/Shared/Error", new ErrorDetails { ErrorMessage = "Unknown sessionId" });
+                return View("Error", new ErrorDetails { ErrorMessage = "Unknown sessionId" });
             }
 
             _cartService.AddClientPurchaseDetails(item.SessionId, new ClientDetails
@@ -56,12 +58,12 @@ namespace GamesMarket.Controllers
                 Surname = item.Surname
             });
 
-            var totalSum = _cartService.OveralPrice(_cartService.GetAllEntries(item.SessionId));
+            var totalSum = _cartService.OverallPrice(_cartService.GetAllEntries(item.SessionId));
 
             return View("PaymentForm", new PaymentSessionWithSum
             { 
                 SessionId = item.SessionId,
-                Sum = totalSum.ToString()
+                Sum = totalSum.ToString(CultureInfo.CurrentCulture)
             });
         }
 
@@ -70,9 +72,9 @@ namespace GamesMarket.Controllers
         {
             var clientDetails = _cartService.GetClientDetails(info.SessionId);
 
-            var totalSum = _cartService.OveralPrice(_cartService.GetAllEntries(info.SessionId));
+            var totalSum = _cartService.OverallPrice(_cartService.GetAllEntries(info.SessionId));
 
-            var orderId = -1;
+            int orderId;
 
             try
             {
@@ -92,13 +94,12 @@ namespace GamesMarket.Controllers
                         ErrorMessage = "Unhandled exception has occured: " + ex.Message,
                     });
             }
-
             return View("PaymentSuccessfull", new PaymentSuccessInfo
             {
-                Email = clientDetails.Email,
                 OrderId = orderId,
-                TotalSum = totalSum.ToString()
-            }); ;
+                Email = clientDetails.Email,
+                TotalSum = $"{totalSum.ToString(CultureInfo.CurrentCulture)} UAH"
+            });
         }
     }
 }

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Basket.BusinessLayer.Interface;
+using Basket.DataAccess.Interface;
 
 namespace Basket.BusinessLayer
 {
@@ -27,13 +29,13 @@ namespace Basket.BusinessLayer
 
         public void Purchase(List<CartLine> cart, PaymentCard card, Buyer buyer)
         {
-            var overalPrice = _cartService.OveralPrice(cart);
+            var overallPrice = _cartService.OverallPrice(cart);
 
             ValidateCard(card);
 
             ValidateBuyer(buyer);
 
-            _paymentService.Pay(card, overalPrice);
+            _paymentService.Pay(card, overallPrice);
         }
 
         public int Purchase(List<CartLine> cart, Buyer buyer)

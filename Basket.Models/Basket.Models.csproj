@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Buyer.cs" />
+    <Compile Include="BuyerWithCart.cs" />
     <Compile Include="CartLine.cs" />
     <Compile Include="ClientDetails.cs" />
     <Compile Include="ClientSessionInfo.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="PaymentCard.cs" />
     <Compile Include="PaymentDetails.cs" />
     <Compile Include="PaymentSessionWithSum.cs" />
+    <Compile Include="Product.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
