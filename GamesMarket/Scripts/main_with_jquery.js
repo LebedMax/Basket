@@ -32,16 +32,13 @@ function setCookie(name, value, options = {}) {
 function updateSessionId() {
     let currentSessionId = getCookie('sessionId');
     if (currentSessionId !== undefined) {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function () {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                if (xmlHttp.responseText === 'False') {
-                    getNewSession();
-                }
+        $.ajax({
+            url: "cart/CheckSession?sessionId=" + currentSessionId
+        }).done(function(response) {
+            if (response === 'False') {
+                getNewSession();
             }
-        }
-        xmlHttp.open("get", window.location.origin + "/cart/CheckSession?sessionId=" + currentSessionId);
-        xmlHttp.send();
+        });
     }
 
     if (currentSessionId === undefined || currentSessionId == 'undefined') {
@@ -50,14 +47,11 @@ function updateSessionId() {
 }
 
 function getNewSession() {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            setCookie('sessionId', xmlHttp.responseText);
-        }
-    }
-    xmlHttp.open("get", window.location.origin + "/cart/CreateSession");
-    xmlHttp.send();
+    $.ajax({
+        url: "cart/CreateSession"
+    }).done(function(response) {
+        setCookie('sessionId', response);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', updateSessionId, false);

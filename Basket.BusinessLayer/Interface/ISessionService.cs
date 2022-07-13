@@ -1,4 +1,4 @@
-﻿namespace Basket.BusinessLayer
+﻿namespace Basket.BusinessLayer.Interface
 {
     public interface ISessionService
     {

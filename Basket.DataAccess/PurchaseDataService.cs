@@ -1,99 +1,128 @@
 ﻿using Basket.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
+using Basket.DataAccess.Interface;
 
 namespace Basket.DataAccess
 {
     public class PurchaseDataService : IPurchaseDataService
     {
         private string ConnectionString => 
-            System.Configuration.ConfigurationManager.ConnectionStrings["AppDBContext"].ConnectionString;
+            System.Configuration.ConfigurationManager.ConnectionStrings["GameMarketConnection"].ConnectionString;
 
         public int MakePurchase(List<CartLine> cartItems, Buyer buyer)
         {
-            var orderId = -1;
+            using var connection = new SqlConnection(ConnectionString);
 
-            using (var connection = new SqlConnection(ConnectionString))
-            {
-                var currentDateTime = DateTime.Now;
+            connection.Open();
 
-                connection.Open();
+            var transaction = connection.BeginTransaction();
+                
+            var clientId = GetClientId(buyer, connection);
 
-                var transaction = connection.BeginTransaction();
+            var orderId = SaveOrder(clientId, connection);
 
-                var command = connection.CreateCommand();
-
-                command.Transaction = transaction;
-
-                CreateOrder(command, currentDateTime, buyer);
-
-                orderId = GetOrderId(connection.CreateCommand(), transaction, currentDateTime);
-
-                InsertGameDetails(cartItems, connection.CreateCommand(), orderId, transaction);
-
-                transaction.Commit();
-            }
+            SaveOrderDetails(orderId, cartItems, connection);
+            
+            transaction.Commit();
 
             return orderId;
         }
 
         #region private
-        private void InsertGameDetails(List<CartLine> cartItems, SqlCommand command, int orderId, SqlTransaction transaction)
+        private static void SaveOrderDetails(int orderId, List<CartLine> cartItems, SqlConnection connection)
         {
             foreach (var item in cartItems)
             {
-                command.Transaction = transaction;
+                var command = connection.CreateCommand();
 
-                command.CommandText = "INSERT INTO [dbo].[GameDatail] ([orderId], [gameid], [price], [quantity]) VALUES " +
-                    "(@orderIdParam, @gameidParam, @priceParam, @quantityParam)";
+                command.CommandText = "INSERT INTO ORDER_DETAILS (PRODUCTID, QUANTITY, PRICE, ORDERID) VALUES " +
+                                      "(@productIdParameter, @quantityParameter, @priceParameter, @orderIdParameter)";
+                
+                command.Parameters.Add(new SqlParameter("productIdParameter", SqlDbType.Int)).Value = item.GameId;
 
-                command.Parameters.Add(new SqlParameter("@orderIdParam", System.Data.SqlDbType.Int)).Value = orderId;
-
-                command.Parameters.Add(new SqlParameter("@gameidParam", System.Data.SqlDbType.Int)).Value = item.GameId;
-
-                command.Parameters.Add(new SqlParameter("@priceParam", System.Data.SqlDbType.Decimal)).Value = item.Price;
-
-                command.Parameters.Add(new SqlParameter("@quantityParam", System.Data.SqlDbType.Int)).Value = item.Quantity;
+                command.Parameters.Add(new SqlParameter("quantityParameter", SqlDbType.Int)).Value = item.Quantity;
+                
+                command.Parameters.Add(new SqlParameter("priceParameter", SqlDbType.Decimal)).Value = item.Price;
+                
+                command.Parameters.Add(new SqlParameter("orderIdParameter", SqlDbType.Int)).Value = orderId;
 
                 command.ExecuteNonQuery();
             }
         }
 
-        private int GetOrderId(SqlCommand command, SqlTransaction transaction, DateTime currentDateTime)
+        private static int SaveOrder(int clientId, SqlConnection connection)
         {
-            command.Transaction = transaction;
+            var command = connection.CreateCommand();
 
-            command.CommandText = "SELECT ID FROM [dbo].[Order] WHERE date = @dateParameter";
+            command.CommandText = "INSERT INTO ORDERS (CLIENTID, CREATEDDATE) VALUES " +
+                                  "(@clientIdParameter, @createdDateParameter); " +
+                                  "SELECT SCOPE_IDENTITY() ";
 
-            command.Parameters.Add(new SqlParameter("@dateParameter", System.Data.SqlDbType.DateTime)).Value = currentDateTime;
+            command.Parameters.Add(new SqlParameter("clientIdParameter", SqlDbType.Int)).Value = clientId;
+
+            command.Parameters.Add(new SqlParameter("createdDateParameter", SqlDbType.DateTime)).Value = DateTime.Now;
+
+            using var reader = command.ExecuteReader();
+            
+            if (reader.Read())
+            {
+                return int.Parse(reader["ID"].ToString());
+            }
+
+            throw new DataServiceException("Unable to save new order");
+        }
+
+        private static int GetClientId(Buyer buyer, SqlConnection connection)
+        {
+            var command = connection.CreateCommand();
+
+            command.CommandText =
+                "SELECT ID FROM CLIENTS " + 
+                    "WHERE LOWER(FIRSTNAME) = @firstNameParameter " +
+                    "AND LOWER(LASTNAME) = @lastNameParameter";
+
+            command.Parameters.Add(new SqlParameter("firstNameParameter", SqlDbType.NVarChar)).Value =
+                buyer.FirstName.ToLower();
+            
+            command.Parameters.Add(new SqlParameter("lastNameParameter", SqlDbType.NVarChar)).Value =
+                buyer.LastName.ToLower();
 
             using (var reader = command.ExecuteReader())
             {
-                reader.Read();
-
-                return int.Parse(reader["ID"].ToString());
+                if (reader.Read())
+                {
+                    return int.Parse(reader["ID"].ToString());
+                }   
             }
-        }
 
-        private void CreateOrder(SqlCommand command, DateTime currentDateTime, Buyer buyer)
-        {
-            command.CommandText = "INSERT INTO [dbo].[Order] ([name], [surname], [adress], [phone], [date], [email]) VALUES " +
-                "(@nameParameter, @surnameParameter, @adressParameter, @phoneParameter, @dateParameter, @emailParameter)";
+            command = connection.CreateCommand();
+            
+            command.CommandText =
+                "INSERT INTO CLIENTS (FIRSTNAME, LASTNAME, PATRONYMIC, ADDRESS, PHONE) VALUES " +
+                "(@firstNameParameter, @lastNameParameter, @patronymicParameter, @addressParamter, @phoneParameter); " + 
+                "SELECT SCOPE_IDENTITY() ";
+            
+            command.Parameters.Add(new SqlParameter("firstNameParameter", SqlDbType.NVarChar)).Value =
+                buyer.FirstName;
+            
+            command.Parameters.Add(new SqlParameter("lastNameParameter", SqlDbType.NVarChar)).Value =
+                buyer.LastName;
+            
+            command.Parameters.Add(new SqlParameter("patronymicParameter", SqlDbType.NVarChar)).Value =
+                buyer.Patronymic;
+            
+            command.Parameters.Add(new SqlParameter("addressParamter", SqlDbType.NVarChar)).Value =
+                buyer.Address;
+            
+            command.Parameters.Add(new SqlParameter("phoneParameter", SqlDbType.NVarChar)).Value =
+                buyer.PhoneNumber;
 
-            command.Parameters.Add(new SqlParameter("@nameParameter", System.Data.SqlDbType.VarChar)).Value = buyer.FirstName;
+            var insertResult = command.ExecuteScalar();
 
-            command.Parameters.Add(new SqlParameter("@surnameParameter", System.Data.SqlDbType.VarChar)).Value = buyer.LastName;
-
-            command.Parameters.Add(new SqlParameter("@adressParameter", System.Data.SqlDbType.VarChar)).Value = buyer.Address;
-
-            command.Parameters.Add(new SqlParameter("@phoneParameter", System.Data.SqlDbType.VarChar)).Value = buyer.PhoneNumber;
-
-            command.Parameters.Add(new SqlParameter("@dateParameter", System.Data.SqlDbType.DateTime)).Value = currentDateTime;
-
-            command.Parameters.Add(new SqlParameter("@emailParameter", System.Data.SqlDbType.VarChar)).Value = "test@gmail.com";
-
-            command.ExecuteNonQuery();
+            return int.Parse(insertResult.ToString());
         }
         #endregion
     }

@@ -1,7 +1,7 @@
-﻿using Basket.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Basket.Models;
 
-namespace Basket.DataAccess
+namespace Basket.DataAccess.Interface
 {
     public interface IPurchaseDataService
     {

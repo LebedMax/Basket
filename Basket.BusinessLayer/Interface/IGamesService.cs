@@ -1,7 +1,7 @@
-﻿using Basket.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Basket.Models;
 
-namespace Basket.BusinessLayer
+namespace Basket.BusinessLayer.Interface
 {
     public interface IGamesService
     {

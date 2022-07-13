@@ -1,6 +1,6 @@
 ﻿using Basket.Models;
 
-namespace Basket.BusinessLayer
+namespace Basket.BusinessLayer.Interface
 {
     public interface IPaymentService
     {
