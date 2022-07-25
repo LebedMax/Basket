@@ -76,10 +76,6 @@
       <Project>{b60d0b31-c9fb-4322-80b2-ede951be1efe}</Project>
       <Name>Basket.Models</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Data_Layer\Data_Layer.csproj">
-      <Project>{8DCA998B-4D58-413F-9D94-C28C8AEACF88}</Project>
-      <Name>Data_Layer</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

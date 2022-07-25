@@ -4,84 +4,85 @@ using System.Data.SqlClient;
 using Basket.DataAccess.Interface;
 using Basket.Models;
 
-namespace Basket.DataAccess;
-
-public class ProductsDataService : IProductDataService
+namespace Basket.DataAccess
 {
-    private static string ConnectionString => 
-        System.Configuration.ConfigurationManager.ConnectionStrings["GameMarketConnection"].ConnectionString;
-    
-    public List<Game> GetAllProducts()
+    public class ProductsDataService : IProductDataService
     {
-        var result = new List<Game>();
-        
-        using var connection = new SqlConnection(ConnectionString);
+        private static string ConnectionString =>
+            System.Configuration.ConfigurationManager.ConnectionStrings["GameMarketConnection"].ConnectionString;
 
-        connection.Open();
-        
-        var command = connection.CreateCommand();
-
-        command.CommandText = "SELECT * FROM PRODUCTS";
-
-        var reader = command.ExecuteReader();
-
-        while (reader.Read())
+        public List<Game> GetAllProducts()
         {
-            result.Add(new Game
+            var result = new List<Game>();
+
+            using var connection = new SqlConnection(ConnectionString);
+
+            connection.Open();
+
+            var command = connection.CreateCommand();
+
+            command.CommandText = "SELECT * FROM PRODUCTS";
+
+            var reader = command.ExecuteReader();
+
+            while (reader.Read())
             {
-                GameId = int.Parse(reader["ID"].ToString()),
-                Description = reader["DESCRIPTION"].ToString(),
-                Name = reader["NAME"].ToString(),
-                Price = decimal.Parse(reader["PRICE"].ToString())
-            });
+                result.Add(new Game
+                {
+                    GameId = int.Parse(reader["ID"].ToString()),
+                    Description = reader["DESCRIPTION"].ToString(),
+                    Name = reader["NAME"].ToString(),
+                    Price = decimal.Parse(reader["PRICE"].ToString())
+                });
+            }
+
+            return result;
         }
-        
-        return result;
-    }
 
-    public decimal GetPrice(int productId)
-    {
-        using var connection = new SqlConnection(ConnectionString);
-
-        var command = connection.CreateCommand();
-
-        command.CommandText = "SELECT PRICE FROM PRODUCTS WHERE ID = @productIdParameter";
-
-        command.Parameters.Add("productIdParameter", SqlDbType.Int).Value = productId;
-        
-        var reader = command.ExecuteReader();
-
-        if (reader.Read())
+        public decimal GetPrice(int productId)
         {
-            return decimal.Parse(reader["PRICE"].ToString());
-        }
-        
-        throw new DataServiceException($"There is no product with id {productId}");
-    }
+            using var connection = new SqlConnection(ConnectionString);
 
-    public Game GetProduct(int productId)
-    {
-        using var connection = new SqlConnection(ConnectionString);
+            var command = connection.CreateCommand();
 
-        var command = connection.CreateCommand();
+            command.CommandText = "SELECT PRICE FROM PRODUCTS WHERE ID = @productIdParameter";
 
-        command.CommandText = "SELECT * FROM PRODUCTS WHERE ID = @productIdParameter";
+            command.Parameters.Add("productIdParameter", SqlDbType.Int).Value = productId;
 
-        command.Parameters.Add("productIdParameter", SqlDbType.Int).Value = productId;
-        
-        var reader = command.ExecuteReader();
+            var reader = command.ExecuteReader();
 
-        if (reader.Read())
-        {
-            return new Game
+            if (reader.Read())
             {
-                GameId = int.Parse(reader["ID"].ToString()),
-                Description = reader["DESCRIPTION"].ToString(),
-                Name = reader["NAME"].ToString(),
-                Price = decimal.Parse(reader["PRICE"].ToString())
-            };
+                return decimal.Parse(reader["PRICE"].ToString());
+            }
+
+            throw new DataServiceException($"There is no product with id {productId}");
         }
-        
-        throw new DataServiceException($"There is no product with id {productId}");
+
+        public Game GetProduct(int productId)
+        {
+            using var connection = new SqlConnection(ConnectionString);
+
+            var command = connection.CreateCommand();
+
+            command.CommandText = "SELECT * FROM PRODUCTS WHERE ID = @productIdParameter";
+
+            command.Parameters.Add("productIdParameter", SqlDbType.Int).Value = productId;
+
+            var reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+                return new Game
+                {
+                    GameId = int.Parse(reader["ID"].ToString()),
+                    Description = reader["DESCRIPTION"].ToString(),
+                    Name = reader["NAME"].ToString(),
+                    Price = decimal.Parse(reader["PRICE"].ToString())
+                };
+            }
+
+            throw new DataServiceException($"There is no product with id {productId}");
+        }
     }
 }

@@ -1,11 +1,12 @@
 ﻿using System;
 
-namespace Basket.DataAccess;
-
-public class DataServiceException : Exception
+namespace Basket.DataAccess
 {
-    public DataServiceException(string message)
-        : base(message)
+    public class DataServiceException : Exception
     {
+        public DataServiceException(string message)
+            : base(message)
+        {
+        }
     }
 }

@@ -40,15 +40,65 @@ namespace Basket.BusinessLayer
 
         public int Purchase(List<CartLine> cart, Buyer buyer)
         {
-            return _purchaseDataService.MakePurchase(cart, buyer);
+            try
+            {
+                ValidateBuyer(buyer);
+
+                return _purchaseDataService.MakePurchase(cart, buyer);
+            }
+            catch (ValidationException ex)
+            {
+                
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
         private void ValidateBuyer(Buyer buyer)
         {
-            //throw new ValidationException("dsfd");
-          //  Regex regex =new Regex(@)
+            if (buyer == null)
+            {
+                throw new ValidationException("Buyer model can't be empty");
+            }
+
+            ValidateName(buyer);
 
         }
+
+        private void ValidateName(Buyer buyer)
+        {
+            if (string.IsNullOrWhiteSpace(buyer.FirstName))
+            {
+                throw new ValidationException("FirstName is empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(buyer.LastName))
+            {
+                throw new ValidationException("LastName is empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(buyer.Patronymic))
+            {
+                throw new ValidationException("Patronymic is empty");
+            }
+
+            if (buyer.FirstName.Length < 2 || buyer.FirstName.Length > 50)
+            {
+                throw new ValidationException("FirstName is empty");
+            }
+        }
+
+        private void CheckValueLength(string name, int minLength, int maxLength)
+        {
+            if (name.Length < 2 || name.Length > 50)
+            {
+                throw new ValidationException($"Field '{name}' must be hiher than {minLength} and lower {maxLength}");
+            }
+        }
+
 
         private void ValidateCard(PaymentCard card)
         {

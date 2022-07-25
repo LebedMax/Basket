@@ -284,10 +284,6 @@
       <Project>{B60D0B31-C9FB-4322-80B2-EDE951BE1EFE}</Project>
       <Name>Basket.Models</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Data_Layer\Data_Layer.csproj">
-      <Project>{8DCA998B-4D58-413F-9D94-C28C8AEACF88}</Project>
-      <Name>Data_Layer</Name>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -125,10 +125,6 @@
       <Project>{B60D0B31-C9FB-4322-80B2-EDE951BE1EFE}</Project>
       <Name>Basket.Models</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Data_Layer\Data_Layer.csproj">
-      <Project>{8dca998b-4d58-413f-9d94-c28c8aeacf88}</Project>
-      <Name>Data_Layer</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
